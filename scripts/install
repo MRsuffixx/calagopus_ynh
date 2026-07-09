@@ -8,7 +8,7 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 # Settings automatically loaded as bash variables:
-#   $domain, $path, $install_dir, $port, $app
+#   $domain, $path, $port, $app
 #   $db_name, $db_user, $db_pwd  (from [resources.database] postgresql)
 
 #=================================================
@@ -31,6 +31,13 @@ apt-get update -qq
 #=================================================
 ynh_script_progression "Installing calagopus-panel from APT repository..."
 
+# Stop the package's auto-started service (if the APT package starts one) so
+# it does not conflict with the YunoHost-managed unit we create below.
+if systemctl is-active --quiet calagopus-panel.service 2>/dev/null; then
+    systemctl stop calagopus-panel.service || true
+    systemctl disable calagopus-panel.service || true
+fi
+
 DEBIAN_FRONTEND=noninteractive apt-get install -y calagopus-panel
 
 #=================================================
@@ -38,17 +45,9 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y calagopus-panel
 #=================================================
 ynh_script_progression "Configuring the PostgreSQL database..."
 
-# [resources.database] type="postgresql" auto-provisions $db_name/$db_user/$db_pwd
-# and runs ynh_psql_setup_db, so the DB and role already exist.
-# Persist the password so upgrade/restore can retrieve it.
+# [resources.database] type="postgresql" auto-provisions $db_name/$db_user/$db_pwd.
+# Persist the password explicitly so upgrade/restore can retrieve it.
 ynh_app_setting_set --key=db_pwd --value="$db_pwd"
-
-# The resource helper creates the DB with the auto-generated name.
-# Calagopus expects the database to be named "panel" and the user "calagopus".
-# We rename/alias by creating the expected objects that map onto the provisioned ones.
-# Per the docs: CREATE USER calagopus WITH PASSWORD '...'; CREATE DATABASE panel OWNER calagopus;
-# Since [resources.database] already created $db_name/$db_user, we set the app
-# to use those (DATABASE_URL will reference $db_user:$db_pwd@localhost:5432/$db_name).
 
 #=================================================
 # CREATE ENVIRONMENT CONFIGURATION
@@ -61,7 +60,7 @@ mkdir -p "$calagopus_conf_dir"
 app_encryption_key=$(ynh_string_random --length=32)
 ynh_app_setting_set --key=app_encryption_key --value="$app_encryption_key"
 
-# Render the .env template into /etc/calagopus/.env
+# Render the .env template into /etc/$app/.env
 ynh_config_add --template="env" --destination="$calagopus_conf_dir/.env"
 
 # Lock down the config file: it contains secrets
@@ -97,22 +96,14 @@ chown "$app:$app" "/var/log/$app"
 ynh_config_add_logrotate
 
 #=================================================
-# INSTALL AS SYSTEMD SERVICE VIA calagopus-panel
-#=================================================
-ynh_script_progression "Registering calagopus-panel as a systemd service..."
-
-# The binary has a built-in service-install sub-command which writes its own
-# unit file. We use our own managed unit (conf/systemd.service) instead, so
-# we do NOT call 'calagopus-panel service-install'. The unit placed by
-# ynh_config_add_systemd is the authoritative one.
-
-#=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemctl --service="$app" --action="start" \
-    --wait_until="Listening on" --log_path="systemd"
+# NOTE: --wait_until is intentionally omitted because we cannot guarantee the
+# exact log string Calagopus emits on startup. ynh_systemctl will start the
+# service and verify it is in an active state after launch.
+ynh_systemctl --service="$app" --action="start" --log_path="systemd"
 
 #=================================================
 # END OF SCRIPT

@@ -23,6 +23,15 @@ ynh_config_remove_systemd
 ynh_config_remove_nginx
 
 #=================================================
+# REMOVE CALAGOPUS PANEL PACKAGE
+#=================================================
+ynh_script_progression "Removing calagopus-panel package..."
+
+# The calagopus-panel package was installed manually (not via [resources.apt])
+# because it requires a third-party APT repository. We must remove it explicitly.
+DEBIAN_FRONTEND=noninteractive apt-get remove -y calagopus-panel || true
+
+#=================================================
 # REMOVE THE CALAGOPUS CONFIGURATION DIRECTORY
 #=================================================
 ynh_script_progression "Removing $app configuration directory..."
@@ -36,9 +45,6 @@ ynh_script_progression "Removing Calagopus APT repository..."
 
 ynh_safe_rm "/etc/apt/sources.list.d/calagopus.list"
 ynh_safe_rm "/usr/share/keyrings/calagopus-archive-keyring.gpg"
-
-# Note: the calagopus-panel binary itself is uninstalled by YunoHost
-# via the [resources.apt] packages list on removal.
 
 #=================================================
 # END OF SCRIPT

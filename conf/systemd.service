@@ -1,16 +1,18 @@
 [Unit]
 Description=Calagopus game server management panel
-After=network.target postgresql.service valkey-server.service
-Requires=postgresql.service
+After=network.target postgresql.service valkey-server.service redis-server.service
+# Wants= (not Requires=) so that stopping PostgreSQL for maintenance
+# does not automatically kill this service.
+Wants=postgresql.service
 
 [Service]
 Type=simple
 User=__APP__
 Group=__APP__
-WorkingDirectory=__INSTALL_DIR__/
+WorkingDirectory=/etc/__APP__/
 
-# Load the environment file from /etc/calagopus/.env
-EnvironmentFile=/etc/calagopus/.env
+# Load the environment file — path uses __APP__ so multi-instance safe
+EnvironmentFile=/etc/__APP__/.env
 
 ExecStart=/usr/bin/calagopus-panel
 

@@ -10,16 +10,16 @@ source /usr/share/yunohost/helpers
 
 ynh_print_info "Declaring files to be backed up..."
 
-#=================================================
-# BACKUP THE APP MAIN DIR (binary location)
-#=================================================
-
-ynh_backup "$install_dir"
+# NOTE: We do NOT back up $install_dir because this is an APT-managed
+# installation. The calagopus-panel binary lives at /usr/bin/calagopus-panel
+# and will be re-installed from the APT repository during restore.
 
 #=================================================
 # BACKUP THE CALAGOPUS CONFIGURATION DIRECTORY
 #=================================================
 
+# /etc/$app/.env contains DATABASE_URL, APP_ENCRYPTION_KEY, and all env vars.
+# This is the most critical file — losing it means losing the encryption key.
 ynh_backup "$calagopus_conf_dir"
 
 #=================================================
@@ -35,7 +35,7 @@ ynh_backup "/etc/systemd/system/$app.service"
 # logrotate configuration
 ynh_backup "/etc/logrotate.d/$app"
 
-# APT repository source and keyring (so restore can reinstall the package)
+# APT repository source and keyring (needed to reinstall the package on restore)
 ynh_backup "/etc/apt/sources.list.d/calagopus.list"
 ynh_backup "/usr/share/keyrings/calagopus-archive-keyring.gpg"
 

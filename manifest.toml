@@ -45,10 +45,13 @@ ram.runtime = "512M"
 
 [resources]
 
+    # Creates the system user $app. Its home will default to /var/lib/$app.
     [resources.system_user]
 
-    [resources.install_dir]
-    dir = "/opt/calagopus"
+    # NOTE: [resources.install_dir] is intentionally absent.
+    # This is an APT-managed installation: the calagopus-panel binary is placed
+    # at /usr/bin/calagopus-panel by the package. There is no app-specific
+    # install directory to provision. Configuration lives in /etc/$app/.env.
 
     [resources.permissions]
     main.url = "/"
@@ -61,6 +64,9 @@ ram.runtime = "512M"
     main.fixed = true
 
     [resources.apt]
+    # These packages are installed BEFORE the install script runs.
+    # calagopus-panel itself is installed in the install script after
+    # adding the third-party APT repository.
     packages = [
         "curl",
         "apt-transport-https",

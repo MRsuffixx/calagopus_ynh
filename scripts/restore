@@ -20,15 +20,6 @@ apt-get update -qq
 DEBIAN_FRONTEND=noninteractive apt-get install -y calagopus-panel
 
 #=================================================
-# RESTORE THE APP MAIN DIR
-#=================================================
-ynh_script_progression "Restoring the app main directory..."
-
-ynh_restore "$install_dir"
-chown -R "$app:$app" "$install_dir"
-chmod -R o-rwx "$install_dir"
-
-#=================================================
 # RESTORE THE CALAGOPUS CONFIGURATION DIRECTORY
 #=================================================
 ynh_script_progression "Restoring $app configuration..."
@@ -77,8 +68,8 @@ chown "$app:$app" "/var/log/$app"
 #=================================================
 ynh_script_progression "Reloading NGINX web server and $app's service..."
 
-ynh_systemctl --service="$app" --action="start" \
-    --wait_until="Listening on" --log_path="systemd"
+# NOTE: --wait_until is intentionally omitted — see install script comment.
+ynh_systemctl --service="$app" --action="start" --log_path="systemd"
 
 ynh_systemctl --service=nginx --action=reload
 

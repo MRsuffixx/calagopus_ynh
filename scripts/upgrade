@@ -73,8 +73,8 @@ ynh_config_add_logrotate
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemctl --service="$app" --action="start" \
-    --wait_until="Listening on" --log_path="systemd"
+# NOTE: --wait_until is intentionally omitted — see install script comment.
+ynh_systemctl --service="$app" --action="start" --log_path="systemd"
 
 #=================================================
 # END OF SCRIPT
