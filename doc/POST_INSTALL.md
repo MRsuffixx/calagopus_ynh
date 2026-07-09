@@ -1,7 +1,5 @@
-This is a dummy disclaimer to display after the install
+Calagopus is now installed! Open the panel in your browser to complete the initial setup wizard (OOBE), create your administrator account, and add your first Wings node to start hosting game servers.
 
-The app url is <https://__DOMAIN____PATH__>
+**Panel URL:** `https://__DOMAIN____PATH__`
 
-The app install dir is `__INSTALL_DIR__`
-
-The app id is `__ID__`
+For detailed post-install instructions, visit the admin documentation.

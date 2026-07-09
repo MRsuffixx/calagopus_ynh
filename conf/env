@@ -1,0 +1,46 @@
+# =============================================================================
+# Calagopus Panel — Environment Configuration
+# Managed by YunoHost — do not edit by hand (changes will be overwritten on upgrade).
+# =============================================================================
+
+# --- Database -----------------------------------------------------------
+# PostgreSQL connection URL (provisioned by YunoHost [resources.database])
+DATABASE_URL="postgresql://__DB_USER__:__DB_PWD__@localhost:5432/__DB_NAME__"
+
+# Run database migrations on every startup (safe for single-instance setups)
+DATABASE_MIGRATE=true
+
+# --- Redis / Valkey -----------------------------------------------------
+REDIS_MODE=redis
+# Valkey listens on the default Redis port; no password by default on local install
+REDIS_URL=redis://127.0.0.1:6379/0
+
+# --- Application --------------------------------------------------------
+# The encryption key protects stored secrets. NEVER rotate without re-encrypting.
+APP_ENCRYPTION_KEY=__APP_ENCRYPTION_KEY__
+
+# Bind to localhost; NGINX terminates TLS and reverse-proxies to this port
+BIND=127.0.0.1
+PORT=__PORT__
+
+# This instance is the primary (handles background jobs)
+APP_PRIMARY=true
+
+# Disable debug output in production
+APP_DEBUG=false
+
+# Trust requests forwarded by the NGINX reverse proxy (local loopback)
+APP_TRUSTED_PROXIES=127.0.0.1
+
+# Write logs to a file (picked up by logrotate)
+APP_LOG_DIRECTORY=/var/log/__APP__
+
+# Wings proxy — enable only for single-node homelab setups
+APP_ENABLE_WINGS_PROXY=false
+
+# Serve the bundled React frontend directly from the panel process
+APP_DISABLE_FRONTEND=false
+
+# Cache settings
+APP_USE_INTERNAL_CACHE=true
+APP_USE_DECRYPTION_CACHE=false

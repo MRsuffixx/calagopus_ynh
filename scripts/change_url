@@ -1,9 +1,5 @@
 #!/bin/bash
 
-## this script is only run if actual change to domain/path is detected, if you're here either $domain or $path changed
-## new location is available via $domain and $path (or $new_domain and $new_path variables if you want to be explicit)
-## old values are available via, you guessed it, $old_domain and $old_path
-
 #=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
@@ -12,35 +8,41 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# STOP SYSTEMD SERVICE
+# BACK UP THE CURRENT CONFIG AND STOP SERVICE
 #=================================================
-ynh_script_progression "Stopping $app's systemd service..."
+ynh_script_progression "Backing up the current configuration before URL change..."
 
 ynh_systemctl --service="$app" --action="stop"
 
 #=================================================
-# MODIFY URL IN NGINX CONF
+# RE-APPLY NGINX WITH THE NEW DOMAIN/PATH
 #=================================================
-ynh_script_progression "Updating NGINX web server configuration..."
+ynh_script_progression "Updating NGINX configuration..."
 
-# this will most likely adjust NGINX config correctly
-ynh_config_change_url_nginx
+# YunoHost sets $new_domain and $new_path before calling this script
+domain=$new_domain
+path=$new_path
 
-#=================================================
-# SPECIFIC MODIFICATIONS
-#=================================================
-
-## do any changes to files that reference specific installation domain/path, i.e. regenerate configs etc
+ynh_config_add_nginx
 
 #=================================================
-# START SYSTEMD SERVICE
+# UPDATE SSOwat PERMISSION URL
 #=================================================
-ynh_script_progression "Starting $app's systemd service..."
+ynh_permission_url --permission="main" \
+    --add_url="$new_domain$new_path" \
+    --remove_url="$old_domain$old_path"
 
-ynh_systemctl --service="$app" --action="start"
+#=================================================
+# RESTART SERVICE
+#=================================================
+ynh_script_progression "Restarting $app's systemd service..."
+
+ynh_systemctl --service="$app" --action="start" \
+    --wait_until="Listening on" --log_path="systemd"
+
+ynh_systemctl --service=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
 #=================================================
-
 ynh_script_progression "Change of URL completed for $app"

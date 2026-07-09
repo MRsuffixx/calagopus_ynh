@@ -1,1 +1,3 @@
-Ceci est une fausse description des fonctionalités de l'app
+Calagopus est un panneau de gestion de serveurs de jeux open-source moderne construit avec Rust et React. Il offre une interface rapide et sécurisée pour déployer, surveiller et maintenir des serveurs de jeux, conçu aussi bien pour les utilisateurs individuels que pour les grands opérateurs d'hébergement.
+
+Il s'inspire de Pterodactyl mais est entièrement réécrit en Rust, offrant des performances nettement meilleures et les garanties de sécurité mémoire de Rust. Le panneau inclut une console en direct, un gestionnaire de fichiers, un navigateur de sauvegardes, des tâches planifiées, la gestion des sous-utilisateurs, l'authentification WebAuthn et une API REST complète.
